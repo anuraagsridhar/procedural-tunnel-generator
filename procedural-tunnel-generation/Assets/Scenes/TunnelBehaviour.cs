@@ -54,16 +54,15 @@ public class TunnelBehaviour : MonoBehaviour
         int triangleIndex = 0;
         for (int r = 0; r < (numSegments - 1); r++)
         {
-            for (int c = 0; c < (numSectors - 1); c++)
+            for (int c = 0; c < numSectors; c++)
             {
-                triangles[triangleIndex++] = r * numSectors + c;
-                triangles[triangleIndex++] = (r + 1) * numSectors + c;
-                triangles[triangleIndex++] = r * numSectors + c + 1;
+                triangles[triangleIndex++] = r * numSectors + (c % numSectors);
+                triangles[triangleIndex++] = (r + 1) * numSectors + (c % numSectors);
+                triangles[triangleIndex++] = r * numSectors + ((c + 1) % numSectors);
 
-                triangles[triangleIndex++] = r * numSectors + c + 1;
-                triangles[triangleIndex++] = (r + 1) * numSectors + c;
-                triangles[triangleIndex++] = (r + 1) * numSectors + (c + 1);
-
+                triangles[triangleIndex++] = r * numSectors + ((c + 1) % numSectors);
+                triangles[triangleIndex++] = (r + 1) * numSectors + (c % numSectors);
+                triangles[triangleIndex++] = (r + 1) * numSectors + ((c + 1) % numSectors);
             }
         }
         print("Created " + triangleIndex + " triangles");

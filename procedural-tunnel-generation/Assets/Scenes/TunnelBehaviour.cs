@@ -6,6 +6,8 @@ public class TunnelBehaviour : MonoBehaviour
 {
     public Camera cameraObject;
 
+    public GameObject tunnelSegmentObject;
+
     Mesh mesh;
 
     /*
@@ -22,51 +24,59 @@ public class TunnelBehaviour : MonoBehaviour
 
     public float radius;
 
+    public int numTunnelSegments;
+
     // Start is called before the first frame update
     void Start()
     {
-        MeshFilter meshFilter = GetComponent<MeshFilter>();
-        mesh = new Mesh();
-        if (meshFilter != null)
+        for (int i = 0; i < numTunnelSegments; i++)
         {
-            print("Mesh filter found");
-            meshFilter.mesh = mesh;
-        }
-
-        Vector3[] vertices = new Vector3[numSegments * numSectors];
-        int vertexIndex = 0;
-        float sectorAngle = (2 * Mathf.PI) / numSectors;
-        for (int r = 0; r < numSegments; r++)
-        {
-            float z = (((float)r / (float)numSegments) - 0.5f) * length;
-            for (int c = 0; c < numSectors; c++)
+            GameObject tunnelSegmentClone = (GameObject)Instantiate(tunnelSegmentObject);
+            MeshFilter meshFilter = tunnelSegmentClone.GetComponent<MeshFilter>();
+            mesh = new Mesh();
+            if (meshFilter != null)
             {
-                float theta = sectorAngle * c;
-                float x = radius * Mathf.Cos(theta);
-                float y = radius * Mathf.Sin(theta);
-                vertices[vertexIndex] = new Vector3(x, y, z);
-                vertexIndex++;
+                print("Mesh filter found");
+                meshFilter.mesh = mesh;
             }
-        }
-        mesh.vertices = vertices;
 
-        int[] triangles = new int[numSegments * numSectors * 6];
-        int triangleIndex = 0;
-        for (int r = 0; r < (numSegments - 1); r++)
-        {
-            for (int c = 0; c < numSectors; c++)
+            Vector3[] vertices = new Vector3[(numSegments + 1) * numSectors];
+            int vertexIndex = 0;
+            float sectorAngle = (2 * Mathf.PI) / numSectors;
+            for (int r = 0; r < (numSegments + 1); r++)
             {
-                triangles[triangleIndex++] = r * numSectors + (c % numSectors);
-                triangles[triangleIndex++] = (r + 1) * numSectors + (c % numSectors);
-                triangles[triangleIndex++] = r * numSectors + ((c + 1) % numSectors);
-
-                triangles[triangleIndex++] = r * numSectors + ((c + 1) % numSectors);
-                triangles[triangleIndex++] = (r + 1) * numSectors + (c % numSectors);
-                triangles[triangleIndex++] = (r + 1) * numSectors + ((c + 1) % numSectors);
+                float z = ((float)r / (float)numSegments) * length;
+                for (int c = 0; c < numSectors; c++)
+                {
+                    float theta = sectorAngle * c;
+                    float x = radius * Mathf.Cos(theta);
+                    float y = radius * Mathf.Sin(theta);
+                    vertices[vertexIndex] = new Vector3(x, y, z);
+                    vertexIndex++;
+                }
             }
+            mesh.vertices = vertices;
+
+            int[] triangles = new int[numSegments * numSectors * 6];
+            int triangleIndex = 0;
+            for (int r = 0; r < numSegments; r++)
+            {
+                for (int c = 0; c < numSectors; c++)
+                {
+                    triangles[triangleIndex++] = r * numSectors + (c % numSectors);
+                    triangles[triangleIndex++] = (r + 1) * numSectors + (c % numSectors);
+                    triangles[triangleIndex++] = r * numSectors + ((c + 1) % numSectors);
+
+                    triangles[triangleIndex++] = r * numSectors + ((c + 1) % numSectors);
+                    triangles[triangleIndex++] = (r + 1) * numSectors + (c % numSectors);
+                    triangles[triangleIndex++] = (r + 1) * numSectors + ((c + 1) % numSectors);
+                }
+            }
+            mesh.triangles = triangles;
+            tunnelSegmentClone.transform.SetParent(this.transform);
+            tunnelSegmentClone.transform.position = new Vector3(0, 0, 0);
+            tunnelSegmentClone.transform.Translate(new Vector3(0, 0, i * length));
         }
-        print("Created " + triangleIndex + " triangles");
-        mesh.triangles = triangles;
 
     }
 
